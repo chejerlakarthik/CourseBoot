@@ -1,2 +1,2 @@
 # CourseBoot
-Spring Boot REST API project
+A spring boot application with REST apis for courses
