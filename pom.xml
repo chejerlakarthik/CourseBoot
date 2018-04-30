@@ -3,7 +3,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.karthik</groupId>
 	<artifactId>CourseBoot</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>CourseBoot</name>
 	<parent>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -46,4 +45,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	<version>1.0</version>
 </project>
