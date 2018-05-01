@@ -4,12 +4,14 @@
 package com.karthik.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.karthik.service.model.Topic;
+import com.karthik.model.Topic;
+import com.karthik.repository.TopicRepository;
 
 /**
  * @author karthikchejerla
@@ -18,36 +20,32 @@ import com.karthik.service.model.Topic;
 @Service
 public class TopicService {
 
-	List<Topic> topics = new ArrayList<Topic>(Arrays.asList(new Topic("java", "Java Language", "Java 8 Features"),
-			new Topic("spring", "Spring Framework", "Spring Boot Fundamentals"),
-			new Topic("javascript", "Javascript", "Javascript closures")));
+	@Autowired
+	private TopicRepository topicRepository;
 
 	public List<Topic> getTopics() {
+		List<Topic> topics = new ArrayList<Topic>();
+		topicRepository.findAll().forEach(topics::add);
 		return topics;
 	}
 
-	public Topic getTopic(String topicId) {
-		return topics.stream().filter(t -> t.getId().equals(topicId)).findFirst().get();
+	public Topic getTopic(long topicId) {
+		Optional<Topic> topic = topicRepository.findById(topicId);
+		return topic.get();
 	}
 
 	public List<Topic> addTopic(Topic topic) {
-		topics.add(topic);
-		return topics;
+		topicRepository.save(topic);
+		return getTopics();
 	}
 
-	public Topic deleteTopic(String topicId) {
-		Topic topicToDelete = getTopic(topicId);
-		topics.remove(topicToDelete);
-		return topicToDelete;
+	public void deleteTopic(long topicId) {
+		topicRepository.deleteById(topicId);
 	}
 
-	public Topic updateTopic(Topic topic, String topicId) {
-		for(int i=0; i<topics.size(); i++) {
-			Topic currentTopic = topics.get(i);
-			if(currentTopic.getId().equals(topicId)) {
-				topics.set(i, topic);
-			}
-		}
+	public Topic updateTopic(Topic topic, long topicId) {
+		topic.setId(topicId);
+		topicRepository.save(topic);
 		return getTopic(topicId);
 	}
 }

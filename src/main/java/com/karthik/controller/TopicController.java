@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.karthik.model.Topic;
 import com.karthik.service.TopicService;
-import com.karthik.service.model.Topic;
 
 @RestController
 public class TopicController {
@@ -24,7 +24,7 @@ public class TopicController {
 	}
 	
 	@RequestMapping(value="/topics/{id}", method=RequestMethod.GET)
-	public Topic getTopics(@PathVariable String id){
+	public Topic getTopic(@PathVariable long id){
 		return topicService.getTopic(id);
 	}
 	
@@ -34,12 +34,12 @@ public class TopicController {
 	}
 	
 	@RequestMapping(value="/topics/{id}", method=RequestMethod.DELETE)
-	public Topic deleteTopic(@PathVariable String id) {
-		return topicService.deleteTopic(id);
+	public void deleteTopic(@PathVariable long id) {
+		topicService.deleteTopic(id);
 	}
 	
 	@RequestMapping(value="/topics/{id}", method=RequestMethod.PUT)
-	public Topic updateTopic(@RequestBody Topic topic, @PathVariable String id) {
+	public Topic updateTopic(@RequestBody Topic topic, @PathVariable long id) {
 		return topicService.updateTopic(topic, id);
 	}
 	
