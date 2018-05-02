@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.karthik.model;
 
 import javax.persistence.Column;
@@ -8,33 +5,23 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-/**
- * @author karthikchejerla
- *
- */
 @Entity
-@Table(name="TOPIC")
-public class Topic {
-	
+@Table(name="COURSE")
+public class Course {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="TOPIC_ID")
+	@Column(name="COURSE_ID")
 	private long id;
-	@Column(name="TOPIC_NAME")
+	@Column(name="COURSE_NAME")
 	private String name;
-	@Column(name="TOPIC_DESCRIPTION")
+	@Column(name="COURSE_DESCRIPTION")
 	private String description;
+	@ManyToOne
+	private Topic topic;
 	
-	public Topic() {}
-	
-	public Topic(long id, String name, String description) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.description = description;
-	}
 	public long getId() {
 		return id;
 	}
@@ -52,5 +39,11 @@ public class Topic {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public Topic getTopic() {
+		return topic;
+	}
+	public void setTopic(Topic topic) {
+		this.topic = topic;
 	}
 }
