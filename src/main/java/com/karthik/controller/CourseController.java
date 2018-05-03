@@ -40,17 +40,17 @@ public class CourseController {
 	
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.PUT)
 	public void updateCourseForTopic(@PathVariable long topicId, @PathVariable long id, @RequestBody Course course) {
-		Topic topic = topicService.getTopic(topicId);
-		Course existingCourse = courseService.getCourse(topicId, id);
-		if (topic != null && existingCourse != null) {
-			course.setTopic(topic);
+		if (topicService.exists(topicId) && courseService.exists(topicId, id)) {
+			course.setTopic(topicService.getTopic(topicId));
 			courseService.updateCourse(course);
 		}
 	}
 	
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.DELETE)
 	public void deleteCourseForTopic(@PathVariable long id, @PathVariable long topicId) {
-		//placeholder
+		if (topicService.exists(topicId) && courseService.exists(topicId, id)) {
+			courseService.deleteCourse(topicId, id);
+		}
 	}
 	
 	@RequestMapping(value = "/topics/{id}/courses", method = RequestMethod.POST)

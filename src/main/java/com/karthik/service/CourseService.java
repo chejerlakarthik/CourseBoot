@@ -44,4 +44,18 @@ public class CourseService {
 	public void addCourse(Course course) {
 		courseRepository.save(course);
 	}
+	
+	/**
+	 * Check if a course exists with an Id matching courseId for a topic
+	 * @param topicId - the input topicId
+	 * @return
+	 */
+	public boolean exists(long topicId, long courseId) {
+		boolean exists = false;
+		Course course = this.getCourse(topicId, courseId);
+		if (null != course) {
+			exists = true;
+		}
+		return exists;
+	}
 }

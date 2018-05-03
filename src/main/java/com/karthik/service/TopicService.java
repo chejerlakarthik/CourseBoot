@@ -5,6 +5,7 @@ package com.karthik.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,11 @@ public class TopicService {
 
 	public Topic getTopic(long topicId) {
 		Optional<Topic> topic = topicRepository.findById(topicId);
-		return topic.get();
+		try{
+			return topic.get();
+		} catch (NoSuchElementException ex){
+			return null;
+		}
 	}
 
 	public List<Topic> addTopic(Topic topic) {
@@ -47,5 +52,19 @@ public class TopicService {
 		topic.setId(topicId);
 		topicRepository.save(topic);
 		return getTopic(topicId);
+	}
+	
+	/**
+	 * Check if a topic exists with an Id matching topicId
+	 * @param topicId - the input topicId
+	 * @return
+	 */
+	public boolean exists(long topicId) {
+		boolean exists = false;
+		Topic topic = this.getTopic(topicId);
+		if (null != topic) {
+			exists = true;
+		}
+		return exists;
 	}
 }

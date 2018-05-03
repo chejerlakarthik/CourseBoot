@@ -35,7 +35,9 @@ public class TopicController {
 	
 	@RequestMapping(value="/topics/{id}", method=RequestMethod.DELETE)
 	public void deleteTopic(@PathVariable long id) {
-		topicService.deleteTopic(id);
+		if (topicService.exists(id)){
+			topicService.deleteTopic(id);
+		}
 	}
 	
 	@RequestMapping(value="/topics/{id}", method=RequestMethod.PUT)
