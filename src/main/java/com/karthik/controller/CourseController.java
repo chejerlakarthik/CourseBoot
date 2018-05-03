@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.karthik.model.Course;
-import com.karthik.model.Topic;
 import com.karthik.service.CourseService;
 import com.karthik.service.TopicService;
+import com.karthik.util.ObjectUtil;
 
 @RestController
 public class CourseController {
@@ -25,41 +25,72 @@ public class CourseController {
 	private CourseService courseService;
 
 	@RequestMapping(value = "/topics/{id}/courses", method = RequestMethod.GET)
-	public List<Course> getAllCoursesForTopic(@PathVariable long id) {
-		return courseService.getAllCourses(id);
+	public ResponseEntity<List<Course>> getAllCoursesForTopic(@PathVariable long id) {
+		List<Course> courses = courseService.getAllCourses(id);
+		ResponseEntity<List<Course>> response = null;
+		if (ObjectUtil.isNotNull(courses)) {
+			response = new ResponseEntity<List<Course>>(courses, HttpStatus.OK);
+		} else {
+			response = new ResponseEntity<List<Course>>(HttpStatus.NOT_FOUND);
+		}
+		return response;
 	}
 
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Course> getCourseById(@PathVariable long topicId, @PathVariable long id) {
+		ResponseEntity<Course> response = null;
 		Course course = courseService.getCourse(topicId, id);
-		if (null == course) {
-			return new ResponseEntity<Course>(HttpStatus.OK);
+		if (ObjectUtil.isNotNull(course)) {
+			response = new ResponseEntity<Course>(course, HttpStatus.OK);
+		} else {
+			response = new ResponseEntity<Course>(HttpStatus.OK);
 		}
-		return new ResponseEntity<Course>(course, HttpStatus.OK);
+		return response;
 	}
 	
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.PUT)
-	public void updateCourseForTopic(@PathVariable long topicId, @PathVariable long id, @RequestBody Course course) {
+	public ResponseEntity<Course> updateCourseForTopic(@PathVariable long topicId, @PathVariable long id,
+			@RequestBody Course course) {
+		ResponseEntity<Course> response = null;
 		if (topicService.exists(topicId) && courseService.exists(topicId, id)) {
 			course.setTopic(topicService.getTopic(topicId));
 			courseService.updateCourse(course);
+			response = new ResponseEntity<Course>(course, HttpStatus.OK);
+		} else {
+			response = new ResponseEntity<Course>(HttpStatus.NOT_FOUND);
 		}
+		return response;
 	}
 	
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.DELETE)
-	public void deleteCourseForTopic(@PathVariable long id, @PathVariable long topicId) {
-		if (topicService.exists(topicId) && courseService.exists(topicId, id)) {
-			courseService.deleteCourse(topicId, id);
+	public ResponseEntity<String> deleteCourseForTopic(@PathVariable long id, @PathVariable long topicId) {
+		ResponseEntity<String> response = null;
+		if (topicService.exists(topicId)) {
+			if (courseService.exists(topicId, id)) {
+				courseService.deleteCourse(topicId, id);
+				response = new ResponseEntity<String>(HttpStatus.OK);
+			} else {
+				response = new ResponseEntity<String>("Course not found", HttpStatus.NOT_FOUND);
+			}
+		} else {
+			response = new ResponseEntity<String>("Topic not found", HttpStatus.NOT_FOUND);
 		}
+		return response;
 	}
 	
 	@RequestMapping(value = "/topics/{id}/courses", method = RequestMethod.POST)
-	public void addCourseForTopic(@RequestBody Course course, @PathVariable long id) {
-		Topic topic = topicService.getTopic(id);
-		Course existingCourse = courseService.getCourse(id, course.getId());
-		if (topic != null && existingCourse == null) {
-			course.setTopic(topic);
-			courseService.addCourse(course);
+	public ResponseEntity<Course> addCourseForTopic(@RequestBody Course course, @PathVariable long id) {
+		ResponseEntity<Course> response = null;
+
+		if (topicService.exists(id)) {
+			if (!ObjectUtil.isNotNull(courseService.getCourse(id, course.getId()))) {
+				course.setTopic(topicService.getTopic(id));
+				courseService.addCourse(course);
+				response = new ResponseEntity<Course>(HttpStatus.CREATED);
+			}
+		} else {
+			response = new ResponseEntity<Course>(HttpStatus.NOT_FOUND);
 		}
+		return response;
 	}
 }
