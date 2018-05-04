@@ -42,8 +42,9 @@ public class CourseService {
 		}
 	}
 	
-	public void addCourse(Course course) {
-		courseRepository.save(course);
+	public Course addCourse(Course course) {
+		Course savedCourse = courseRepository.save(course);
+		return savedCourse;
 	}
 	
 	/**

@@ -30,7 +30,7 @@ public class TopicController {
 	@RequestMapping(value = "/topics", method = RequestMethod.GET)
 	public ResponseEntity<List<Topic>> getTopics() {
 		ResponseEntity<List<Topic>> response = null;
-		List<Topic> topics = topicService.getTopics();
+		List<Topic> topics = topicService.getAllTopics();
 		if (ObjectUtil.isNotNull(topics)) {
 			response = new ResponseEntity<List<Topic>>(topics, HttpStatus.OK);
 		} else {

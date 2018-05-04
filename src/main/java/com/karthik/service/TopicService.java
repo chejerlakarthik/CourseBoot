@@ -25,7 +25,7 @@ public class TopicService {
 	@Autowired
 	private TopicRepository topicRepository;
 
-	public List<Topic> getTopics() {
+	public List<Topic> getAllTopics() {
 		List<Topic> topics = new ArrayList<Topic>();
 		topicRepository.findAll().forEach(topics::add);
 		return topics;
@@ -40,9 +40,9 @@ public class TopicService {
 		}
 	}
 
-	public void addTopic(Topic topic) {
-		topicRepository.save(topic);
-		return;
+	public Topic addTopic(Topic topic) {
+		Topic savedTopic = topicRepository.save(topic);
+		return savedTopic;
 	}
 
 	public void deleteTopic(long topicId) {
