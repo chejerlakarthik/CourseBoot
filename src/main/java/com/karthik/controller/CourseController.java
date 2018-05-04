@@ -85,8 +85,13 @@ public class CourseController {
 		if (topicService.exists(id)) {
 			if (!ObjectUtil.isNotNull(courseService.getCourse(id, course.getId()))) {
 				course.setTopic(topicService.getTopic(id));
-				courseService.addCourse(course);
-				response = new ResponseEntity<Course>(HttpStatus.CREATED);
+				if (courseService.isValid(course)){
+					courseService.addCourse(course);
+					response = new ResponseEntity<Course>(HttpStatus.CREATED);
+				} else{
+					response = new ResponseEntity<Course>(HttpStatus.BAD_REQUEST);
+				}
+				
 			}
 		} else {
 			response = new ResponseEntity<Course>(HttpStatus.NOT_FOUND);

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.karthik.model.Course;
+import com.karthik.model.Topic;
 import com.karthik.repository.CourseRepository;
 
 @Service
@@ -57,5 +58,18 @@ public class CourseService {
 			exists = true;
 		}
 		return exists;
+	}
+	
+	/**
+	 * Determine if the passed topic object is valid or not
+	 * @param topic
+	 * @return
+	 */
+	public boolean isValid(Course course){
+		boolean isValid = false;
+		if (course.getName() != null && course.getDescription()!= null){
+			isValid = true;
+		}
+		return isValid;
 	}
 }

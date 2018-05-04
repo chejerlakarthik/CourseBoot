@@ -67,4 +67,17 @@ public class TopicService {
 		}
 		return exists;
 	}
+	
+	/**
+	 * Determine if the passed topic object is valid or not
+	 * @param topic
+	 * @return
+	 */
+	public boolean isValid(Topic topic){
+		boolean isValid = false;
+		if (topic.getName() != null && topic.getDescription()!= null){
+			isValid = true;
+		}
+		return isValid;
+	}
 }

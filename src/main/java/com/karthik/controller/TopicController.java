@@ -18,7 +18,7 @@ import com.karthik.util.ObjectUtil;
 
 @RestController
 public class TopicController {
-	
+
 	@Autowired
 	private TopicService topicService;
 
@@ -49,11 +49,15 @@ public class TopicController {
 	@RequestMapping(value = "/topics", method = RequestMethod.POST)
 	public ResponseEntity<List<Topic>> addTopic(@RequestBody Topic topic) {
 		ResponseEntity<List<Topic>> response = null;
-		List<Topic> topics = topicService.addTopic(topic);
-		if (ObjectUtil.isNotNull(topics)) {
-			response = new ResponseEntity<List<Topic>>(topics, HttpStatus.OK);
-		} else {
-			response = new ResponseEntity<List<Topic>>(HttpStatus.OK);
+		if (topicService.isValid(topic)){
+			List<Topic> topics = topicService.addTopic(topic);
+			if (ObjectUtil.isNotNull(topics)) {
+				response = new ResponseEntity<List<Topic>>(topics, HttpStatus.OK);
+			} else {
+				response = new ResponseEntity<List<Topic>>(HttpStatus.OK);
+			}
+		}else{
+			response = new ResponseEntity<List<Topic>>(HttpStatus.BAD_REQUEST);
 		}
 		return response;
 	}
@@ -73,15 +77,20 @@ public class TopicController {
 	@RequestMapping(value = "/topics/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Topic> updateTopic(@RequestBody Topic topic, @PathVariable long id) {
 		ResponseEntity<Topic> response = null;
-		if (topicService.exists(id)) {
-			Topic updatedTopic = topicService.updateTopic(topic, id);
-			if (ObjectUtil.isNotNull(updatedTopic)) {
-				response = new ResponseEntity<Topic>(updatedTopic, HttpStatus.OK);
+
+		if (topicService.isValid(topic)) {
+			if (topicService.exists(id)) {
+				Topic updatedTopic = topicService.updateTopic(topic, id);
+				if (ObjectUtil.isNotNull(updatedTopic)) {
+					response = new ResponseEntity<Topic>(updatedTopic, HttpStatus.OK);
+				} else {
+					response = new ResponseEntity<Topic>(HttpStatus.BAD_REQUEST);
+				}
 			} else {
-				response = new ResponseEntity<Topic>(HttpStatus.BAD_REQUEST);
+				response = new ResponseEntity<Topic>(HttpStatus.NOT_FOUND);
 			}
 		} else {
-			response = new ResponseEntity<Topic>(HttpStatus.NOT_FOUND);
+			response = new ResponseEntity<Topic>(HttpStatus.BAD_REQUEST);
 		}
 		return response;
 	}
