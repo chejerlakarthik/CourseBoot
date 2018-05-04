@@ -1,8 +1,11 @@
 package com.karthik.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.karthik.exception.CourseDoesNotExistException;
 import com.karthik.exception.ErrorPayload;
@@ -83,19 +87,26 @@ public class CourseController {
 	}
 	
 	@RequestMapping(value = "/topics/{id}/courses", method = RequestMethod.POST)
-	public ResponseEntity<Course> addCourseForTopic(@RequestBody Course course, @PathVariable long id) throws TopicDoesNotExistException, CourseDoesNotExistException {
+	public ResponseEntity<Course> addCourseForTopic(@RequestBody Course course, @PathVariable long id,
+			UriComponentsBuilder uriBuilder) throws TopicDoesNotExistException, CourseDoesNotExistException {
 		ResponseEntity<Course> response = null;
 
 		if (topicService.exists(id)) {
-			if (!ObjectUtil.isNotNull(courseService.getCourse(id, course.getId()))) {
+			if (!courseService.exists(id, course.getId())) {
 				course.setTopic(topicService.getTopic(id));
-				if (courseService.isValid(course)){
+				if (courseService.isValid(course)) {
 					courseService.addCourse(course);
-					response = new ResponseEntity<Course>(HttpStatus.CREATED);
-				} else{
+					Map<String, Long> uriVariables = new HashMap<String, Long>();
+					uriVariables.put("topicId", id);
+					uriVariables.put("courseId", course.getId());
+					HttpHeaders headers = new HttpHeaders();
+					headers.setLocation(uriBuilder.path("/topics/{topicId}/courses/{courseId}")
+							.buildAndExpand(uriVariables).toUri());
+					response = new ResponseEntity<Course>(course, headers, HttpStatus.CREATED);
+				} else {
 					response = new ResponseEntity<Course>(HttpStatus.BAD_REQUEST);
 				}
-				
+
 			}
 		} else {
 			response = new ResponseEntity<Course>(HttpStatus.NOT_FOUND);

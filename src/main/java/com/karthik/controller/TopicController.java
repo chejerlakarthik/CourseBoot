@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.karthik.exception.ErrorPayload;
 import com.karthik.exception.TopicDoesNotExistException;
@@ -50,17 +52,15 @@ public class TopicController {
 	}
 
 	@RequestMapping(value = "/topics", method = RequestMethod.POST)
-	public ResponseEntity<List<Topic>> addTopic(@RequestBody Topic topic) {
-		ResponseEntity<List<Topic>> response = null;
+	public ResponseEntity<Topic> addTopic(@RequestBody Topic topic, UriComponentsBuilder uriBuilder) {
+		ResponseEntity<Topic> response = null;
 		if (topicService.isValid(topic)){
-			List<Topic> topics = topicService.addTopic(topic);
-			if (ObjectUtil.isNotNull(topics)) {
-				response = new ResponseEntity<List<Topic>>(topics, HttpStatus.OK);
-			} else {
-				response = new ResponseEntity<List<Topic>>(HttpStatus.OK);
-			}
+			topicService.addTopic(topic);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(uriBuilder.path("/topics/{id}").buildAndExpand(topic.getId()).toUri());
+			response = new ResponseEntity<Topic>(topic, headers, HttpStatus.CREATED);
 		}else{
-			response = new ResponseEntity<List<Topic>>(HttpStatus.BAD_REQUEST);
+			response = new ResponseEntity<Topic>(HttpStatus.BAD_REQUEST);
 		}
 		return response;
 	}

@@ -48,15 +48,21 @@ public class CourseService {
 	
 	/**
 	 * Check if a course exists with an Id matching courseId for a topic
-	 * @param topicId - the input topicId
+	 * 
+	 * @param topicId
+	 *            - the input topicId
 	 * @return
-	 * @throws CourseDoesNotExistException 
+	 * @throws CourseDoesNotExistException
 	 */
 	public boolean exists(long topicId, long courseId) throws CourseDoesNotExistException {
 		boolean exists = false;
-		Course course = this.getCourse(topicId, courseId);
-		if (null != course) {
-			exists = true;
+		if (courseId == 0) {
+			exists = false;
+		} else {
+			Course course = this.getCourse(topicId, courseId);
+			if (null != course) {
+				exists = true;
+			}
 		}
 		return exists;
 	}

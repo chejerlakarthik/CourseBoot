@@ -40,9 +40,9 @@ public class TopicService {
 		}
 	}
 
-	public List<Topic> addTopic(Topic topic) {
+	public void addTopic(Topic topic) {
 		topicRepository.save(topic);
-		return getTopics();
+		return;
 	}
 
 	public void deleteTopic(long topicId) {
