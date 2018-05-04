@@ -5,12 +5,16 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.karthik.exception.CourseDoesNotExistException;
+import com.karthik.exception.ErrorPayload;
+import com.karthik.exception.TopicDoesNotExistException;
 import com.karthik.model.Course;
 import com.karthik.service.CourseService;
 import com.karthik.service.TopicService;
@@ -37,7 +41,7 @@ public class CourseController {
 	}
 
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Course> getCourseById(@PathVariable long topicId, @PathVariable long id) {
+	public ResponseEntity<Course> getCourseById(@PathVariable long topicId, @PathVariable long id) throws CourseDoesNotExistException {
 		ResponseEntity<Course> response = null;
 		Course course = courseService.getCourse(topicId, id);
 		if (ObjectUtil.isNotNull(course)) {
@@ -50,7 +54,7 @@ public class CourseController {
 	
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Course> updateCourseForTopic(@PathVariable long topicId, @PathVariable long id,
-			@RequestBody Course course) {
+			@RequestBody Course course) throws TopicDoesNotExistException, CourseDoesNotExistException {
 		ResponseEntity<Course> response = null;
 		if (topicService.exists(topicId) && courseService.exists(topicId, id)) {
 			course.setTopic(topicService.getTopic(topicId));
@@ -63,7 +67,7 @@ public class CourseController {
 	}
 	
 	@RequestMapping(value = "/topics/{topicId}/courses/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<String> deleteCourseForTopic(@PathVariable long id, @PathVariable long topicId) {
+	public ResponseEntity<String> deleteCourseForTopic(@PathVariable long id, @PathVariable long topicId) throws TopicDoesNotExistException, CourseDoesNotExistException {
 		ResponseEntity<String> response = null;
 		if (topicService.exists(topicId)) {
 			if (courseService.exists(topicId, id)) {
@@ -79,7 +83,7 @@ public class CourseController {
 	}
 	
 	@RequestMapping(value = "/topics/{id}/courses", method = RequestMethod.POST)
-	public ResponseEntity<Course> addCourseForTopic(@RequestBody Course course, @PathVariable long id) {
+	public ResponseEntity<Course> addCourseForTopic(@RequestBody Course course, @PathVariable long id) throws TopicDoesNotExistException, CourseDoesNotExistException {
 		ResponseEntity<Course> response = null;
 
 		if (topicService.exists(id)) {
@@ -97,5 +101,13 @@ public class CourseController {
 			response = new ResponseEntity<Course>(HttpStatus.NOT_FOUND);
 		}
 		return response;
+	}
+	
+	@ExceptionHandler(CourseDoesNotExistException.class)
+	ResponseEntity<ErrorPayload> handleNotFounds(Exception e){
+		ErrorPayload payload = new ErrorPayload();
+		payload.setHttpStatusCode(HttpStatus.NOT_FOUND.value());
+		payload.setErrorMessage(e.getMessage());
+		return new ResponseEntity<ErrorPayload>(payload, HttpStatus.NOT_FOUND);
 	}
 }

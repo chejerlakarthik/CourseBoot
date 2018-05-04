@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.karthik.exception.TopicDoesNotExistException;
 import com.karthik.model.Topic;
 import com.karthik.repository.TopicRepository;
 
@@ -30,12 +31,12 @@ public class TopicService {
 		return topics;
 	}
 
-	public Topic getTopic(long topicId) {
+	public Topic getTopic(long topicId) throws TopicDoesNotExistException {
 		Optional<Topic> topic = topicRepository.findById(topicId);
 		try{
 			return topic.get();
 		} catch (NoSuchElementException ex){
-			return null;
+			throw new TopicDoesNotExistException(topicId);
 		}
 	}
 
@@ -48,7 +49,7 @@ public class TopicService {
 		topicRepository.deleteById(topicId);
 	}
 
-	public Topic updateTopic(Topic topic, long topicId) {
+	public Topic updateTopic(Topic topic, long topicId) throws TopicDoesNotExistException {
 		topic.setId(topicId);
 		topicRepository.save(topic);
 		return getTopic(topicId);
@@ -58,8 +59,9 @@ public class TopicService {
 	 * Check if a topic exists with an Id matching topicId
 	 * @param topicId - the input topicId
 	 * @return
+	 * @throws TopicDoesNotExistException 
 	 */
-	public boolean exists(long topicId) {
+	public boolean exists(long topicId) throws TopicDoesNotExistException {
 		boolean exists = false;
 		Topic topic = this.getTopic(topicId);
 		if (null != topic) {

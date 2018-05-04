@@ -6,8 +6,8 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.karthik.exception.CourseDoesNotExistException;
 import com.karthik.model.Course;
-import com.karthik.model.Topic;
 import com.karthik.repository.CourseRepository;
 
 @Service
@@ -21,13 +21,13 @@ public class CourseService {
 		return courses;
 	}
 
-	public Course getCourse(long topicId, long courseId) {
+	public Course getCourse(long topicId, long courseId) throws CourseDoesNotExistException {
 		List<Course> courses = courseRepository.findByTopicId(topicId);
 		try {
 			return courses.stream().filter(t -> t.getId() == courseId).findFirst().get();
 		}
 		catch(NoSuchElementException ex) {
-			return null;
+			throw new CourseDoesNotExistException(courseId, topicId);
 		}
 	}
 	
@@ -35,7 +35,7 @@ public class CourseService {
 		courseRepository.save(course);
 	}
 	
-	public void deleteCourse(long topicId, long courseId) {
+	public void deleteCourse(long topicId, long courseId) throws CourseDoesNotExistException {
 		Course course = this.getCourse(topicId, courseId);
 		if (course != null) {
 			courseRepository.delete(course);
@@ -50,8 +50,9 @@ public class CourseService {
 	 * Check if a course exists with an Id matching courseId for a topic
 	 * @param topicId - the input topicId
 	 * @return
+	 * @throws CourseDoesNotExistException 
 	 */
-	public boolean exists(long topicId, long courseId) {
+	public boolean exists(long topicId, long courseId) throws CourseDoesNotExistException {
 		boolean exists = false;
 		Course course = this.getCourse(topicId, courseId);
 		if (null != course) {

@@ -6,12 +6,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.karthik.exception.ErrorPayload;
+import com.karthik.exception.TopicDoesNotExistException;
 import com.karthik.model.Topic;
 import com.karthik.service.TopicService;
 import com.karthik.util.ObjectUtil;
@@ -35,7 +38,7 @@ public class TopicController {
 	}
 
 	@RequestMapping(value = "/topics/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Topic> getTopic(@PathVariable long id) {
+	public ResponseEntity<Topic> getTopic(@PathVariable long id) throws TopicDoesNotExistException{
 		ResponseEntity<Topic> response = null;
 		Topic topic = topicService.getTopic(id);
 		if (ObjectUtil.isNotNull(topic)) {
@@ -63,7 +66,7 @@ public class TopicController {
 	}
 
 	@RequestMapping(value = "/topics/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<Void> deleteTopic(@PathVariable long id) {
+	public ResponseEntity<Void> deleteTopic(@PathVariable long id) throws TopicDoesNotExistException {
 		ResponseEntity<Void> response = null;
 		if (topicService.exists(id)) {
 			topicService.deleteTopic(id);
@@ -75,7 +78,7 @@ public class TopicController {
 	}
 
 	@RequestMapping(value = "/topics/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<Topic> updateTopic(@RequestBody Topic topic, @PathVariable long id) {
+	public ResponseEntity<Topic> updateTopic(@RequestBody Topic topic, @PathVariable long id) throws TopicDoesNotExistException {
 		ResponseEntity<Topic> response = null;
 
 		if (topicService.isValid(topic)) {
@@ -93,6 +96,14 @@ public class TopicController {
 			response = new ResponseEntity<Topic>(HttpStatus.BAD_REQUEST);
 		}
 		return response;
+	}
+	
+	@ExceptionHandler(TopicDoesNotExistException.class)
+	ResponseEntity<ErrorPayload> handleNotFounds(Exception e){
+		ErrorPayload payload = new ErrorPayload();
+		payload.setHttpStatusCode(HttpStatus.NOT_FOUND.value());
+		payload.setErrorMessage(e.getMessage());
+		return new ResponseEntity<ErrorPayload>(payload, HttpStatus.NOT_FOUND);
 	}
 
 }
