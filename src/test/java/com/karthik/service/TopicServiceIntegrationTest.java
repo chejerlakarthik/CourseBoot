@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.karthik.service.integration;
+package com.karthik.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

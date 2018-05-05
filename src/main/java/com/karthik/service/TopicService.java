@@ -45,14 +45,14 @@ public class TopicService {
 		return savedTopic;
 	}
 
-	public void deleteTopic(long topicId) {
+	public void deleteTopic(Long topicId) {
 		topicRepository.deleteById(topicId);
 	}
 
 	public Topic updateTopic(Topic topic, long topicId) throws TopicDoesNotExistException {
 		topic.setId(topicId);
-		topicRepository.save(topic);
-		return getTopic(topicId);
+		Topic updatedTopic = topicRepository.save(topic);
+		return updatedTopic;
 	}
 	
 	/**

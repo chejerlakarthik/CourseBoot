@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.karthik.service.unit;
+package com.karthik.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,9 +12,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,9 +26,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
+import com.karthik.exception.TopicDoesNotExistException;
 import com.karthik.model.Topic;
 import com.karthik.repository.TopicRepository;
-import com.karthik.service.TopicService;
 
 /**
  * @author karthikchejerla
@@ -34,6 +37,9 @@ import com.karthik.service.TopicService;
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(webEnvironment=WebEnvironment.NONE)
 public class TopicServiceUnitTest {
+	
+	@Rule
+	public ExpectedException exceptions = ExpectedException.none();
 	
 	@Mock
 	private TopicRepository topicRepository;
@@ -91,7 +97,49 @@ public class TopicServiceUnitTest {
 		assertEquals(retrievedTopics.get(1).getId(), 11);
 	}
 	
-	public void testGetOneTopic() {
+	@Test
+	public void testGetOneTopic() throws TopicDoesNotExistException{
+		Topic topic = new Topic(1, "Test Name", "Test Description");
 		
+		when(topicRepository.findById(any(Long.class))).thenReturn(Optional.of(topic));
+		
+		Topic retrievedTopic = topicService.getTopic(100L);
+		
+		assertNotNull(retrievedTopic);
+		assertEquals(retrievedTopic.getId(), 1);
+		assertEquals(retrievedTopic.getName(), "Test Name");
+		assertEquals(retrievedTopic.getDescription(), "Test Description");
+	}
+	
+	/**
+	 * Testing exception using 'expected' attribute
+	 * @throws TopicDoesNotExistException
+	 */
+	@Test(expected=TopicDoesNotExistException.class)
+	public void testTopicDoesNotExistExceptionIsThrown() throws TopicDoesNotExistException {
+		when(topicRepository.findById(100L)).thenReturn(Optional.empty());
+		topicService.getTopic(100L);
+	}
+	
+	/**
+	 * Testing exception with ExpectedException
+	 * @throws TopicDoesNotExistException
+	 */
+	@Test
+	public void testTopicDoesNotExistExceptionIsThrownDuplicate() throws TopicDoesNotExistException {
+		when(topicRepository.findById(100L)).thenReturn(Optional.empty());
+		
+		exceptions.expect(TopicDoesNotExistException.class);
+		exceptions.expectMessage("Topic '100' does not exist");
+		
+		topicService.getTopic(100);
+	}
+	
+	@Test
+	public void testUpdateTopic() throws TopicDoesNotExistException {
+		Topic topic = new Topic(1, "Updated Name", "Updated Description");
+		when(topicRepository.save(any(Topic.class))).thenReturn(topic);
+		
+		topicService.updateTopic(new Topic(), 1);	
 	}
 }
