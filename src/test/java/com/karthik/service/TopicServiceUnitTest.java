@@ -3,6 +3,7 @@
  */
 package com.karthik.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -39,7 +40,7 @@ import com.karthik.repository.TopicRepository;
 public class TopicServiceUnitTest {
 	
 	@Rule
-	public ExpectedException exceptions = ExpectedException.none();
+	public ExpectedException thrown = ExpectedException.none();
 	
 	@Mock
 	private TopicRepository topicRepository;
@@ -129,8 +130,8 @@ public class TopicServiceUnitTest {
 	public void testTopicDoesNotExistExceptionIsThrownDuplicate() throws TopicDoesNotExistException {
 		when(topicRepository.findById(100L)).thenReturn(Optional.empty());
 		
-		exceptions.expect(TopicDoesNotExistException.class);
-		exceptions.expectMessage("Topic '100' does not exist");
+		thrown.expect(TopicDoesNotExistException.class);
+		thrown.expectMessage("Topic '100' does not exist");
 		
 		topicService.getTopic(100);
 	}
@@ -141,5 +142,41 @@ public class TopicServiceUnitTest {
 		when(topicRepository.save(any(Topic.class))).thenReturn(topic);
 		
 		topicService.updateTopic(new Topic(), 1);	
+	}
+	
+	@Test
+	public void testIsValid() {
+		Topic topic1 = new Topic();
+		topic1.setName(null);
+		
+		Topic topic2 = new Topic();
+		topic2.setName("Topic2");
+		topic2.setDescription("Topic2 description");
+		
+		Topic topic3 = new Topic();
+		topic3.setName("Topic3");
+		topic3.setDescription(null);
+		
+		assertThat(topicService.isValid(topic1)==false);
+		assertThat(topicService.isValid(topic2)==true);
+		assertThat(topicService.isValid(topic3)==false);
+	}
+	
+	@Test
+	public void testExistsPositiveScenario() throws TopicDoesNotExistException {
+		Topic topic = new Topic(1, "Mock Topic", "Mock Description");
+		when(topicRepository.findById(any(Long.class))).thenReturn(Optional.of(topic));
+		
+		assertThat(topicService.exists(99)==true);
+	}
+	
+	@Test
+	public void testExistsNegativeScenario() throws TopicDoesNotExistException {
+		when(topicRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+		
+		thrown.expect(TopicDoesNotExistException.class);
+		thrown.expectMessage("Topic '99' does not exist");
+		
+		assertThat(topicService.exists(99)==false);
 	}
 }
